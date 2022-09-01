@@ -1,2 +1,20 @@
-{:lint-as {devcards.core/defcard cljs.core/def
-           devcards.core/deftest cljs.core/def}}
+{:config-paths
+ ["../resources/clj-kondo.exports/com.github.camsaul/humane-are"]
+
+ :linters
+ {:docstring-leading-trailing-whitespace {:level :warning}
+  :keyword-binding                       {:level :warning}
+  :misplaced-docstring                   {:level :warning}
+  :missing-body-in-when                  {:level :warning}
+  :missing-else-branch                   {:level :warning}
+  :namespace-name-mismatch               {:level :warning}
+  :non-arg-vec-return-type-hint          {:level :warning}
+  :reduce-without-init                   {:level :warning}
+  :redundant-fn-wrapper                  {:level :warning}
+  :refer                                 {:level :warning}
+  :shadowed-var                          {:level :warning}
+  :single-key-in                         {:level :warning}
+  :unsorted-required-namespaces          {:level :warning}
+  :use                                   {:level :warning}
+  :used-underscored-binding              {:level :warning}
+  :warn-on-reflection                    {:level :warning}}}

@@ -7,7 +7,6 @@
 .lein-plugins/
 .lein-repl-history
 .nrepl-port
-.nrepl-port
 .shadow-cljs
 /checkouts/
 /classes/
