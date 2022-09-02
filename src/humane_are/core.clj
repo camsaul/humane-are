@@ -59,8 +59,6 @@
     (alter-var-root (constantly @#'are+))
     (alter-meta! merge (select-keys (meta #'are+) [:ns :name :file :column :line])))
 
-  (println "INSTALLED OVER" (macros/case :clj #'clojure.test/are :cljs #'cljs.test/are))
-
   (macros/case
     :clj
     (s/fdef clojure.test/are
