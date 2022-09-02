@@ -238,6 +238,10 @@ If you don't want to *replace* `clojure.core/are`, you can use `humane-are.core/
 Don't be afraid to install it tho. If you change your mind or hate fun you can use `humane-are.core/uninstall!` to
 uninstall Humane Are and go back to a sad world of imhumane `are`.
 
+I think replacing `clojure.test/are`/`cljs.test/are` is generally preferable because lots of tooling is built around
+it -- for example [`clojure-mode`](https://github.com/clojure-emacs/clojure-mode/) can nicely align your `are`guments
+for you, and I haven't figured out how to get it to do this with `are`-like macros yet.
+
 ## ClojureScript Support
 
 `humane-are.core/are+` works with ClojureScript, including both the extra testing context
