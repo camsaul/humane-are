@@ -1,4 +1,4 @@
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/camsaul/humane-are/Tests/master?style=for-the-badge)](https://github.com/camsaul/humane-are/actions/workflows/test.yml)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/camsaul/humane-are/Tests/master?style=for-the-badge)](https://github.com/camsaul/humane-are/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/license-Eclipse%20Public%20License-blue.svg?style=for-the-badge)](https://raw.githubusercontent.com/camsaul/humane-are/master/LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/camsaul/humane-are?style=for-the-badge)](https://github.com/camsaul/humane-are/commits/)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/camsaul?style=for-the-badge)](https://github.com/sponsors/camsaul)
