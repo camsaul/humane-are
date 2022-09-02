@@ -13,11 +13,7 @@ jobs:
       with:
         check-name: Run clj-kondo
         clj-kondo-args: >-
-          --lint
-          src
-          test
-          toucan1/src
-          toucan1/test
+          --lint src test
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
   tests-clj:
@@ -72,8 +68,10 @@ jobs:
           ~/.gitlibs
           ~/.deps.clj
         key: tests-cljs
+    - name: Compile
+      run: yarn run shadow-cljs compile
     - name: Run tests
-      run: yarn run test
+      run: node target/node-tests.js
 
   whitespace-linter:
     runs-on: ubuntu-20.04
