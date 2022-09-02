@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "clean": "rimraf public/js",
-    "test": "shadow-cljs compile test && node target/node-tests.js"
+    "test": "yarn && shadow-cljs compile test && node target/node-tests.js"
   },
   "devDependencies": {
     "rimraf": "~3.0.2",

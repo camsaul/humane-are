@@ -1,9 +1,9 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/camsaul/humane-are/Tests/master?style=for-the-badge)](https://github.com/camsaul/humane-are/actions/workflows/config.yml)
 [![License](https://img.shields.io/badge/license-Eclipse%20Public%20License-blue.svg?style=for-the-badge)](https://raw.githubusercontent.com/camsaul/humane-are/master/LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/camsaul/humane-are?style=for-the-badge)](https://github.com/camsaul/humane-are/commits/)
-[![Codecov](https://img.shields.io/codecov/c/github/camsaul/humane-are?style=for-the-badge)](https://codecov.io/gh/camsaul/humane-are)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/camsaul?style=for-the-badge)](https://github.com/sponsors/camsaul)
 [![cljdoc badge](https://img.shields.io/badge/dynamic/json?color=informational&label=cljdoc&query=results%5B%3F%28%40%5B%22artifact-id%22%5D%20%3D%3D%20%22humane-are%22%29%5D.version&url=https%3A%2F%2Fcljdoc.org%2Fapi%2Fsearch%3Fq%3Dio.github.camsaul%2Fhumane-are&style=for-the-badge)](https://cljdoc.org/d/io.github.camsaul/humane-are/CURRENT)
+<!-- [![Codecov](https://img.shields.io/codecov/c/github/camsaul/humane-are?style=for-the-badge)](https://codecov.io/gh/camsaul/humane-are) -->
 <!-- [![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23toucan-4A154B?logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/toucan) -->
 <!-- [![Downloads](https://versions.deps.co/camsaul/humane-are/downloads.svg)](https://versions.deps.co/camsaul/humane-are) -->
 <!-- [![Dependencies Status](https://versions.deps.co/camsaul/humane-are/status.svg)](https://versions.deps.co/camsaul/humane-are) -->
@@ -237,6 +237,10 @@ If you don't want to *replace* `clojure.core/are`, you can use `humane-are.core/
 
 Don't be afraid to install it tho. If you change your mind or hate fun you can use `humane-are.core/uninstall!` to
 uninstall Humane Are and go back to a sad world of imhumane `are`.
+
+I think replacing `clojure.test/are`/`cljs.test/are` is generally preferable because lots of tooling is built around
+it -- for example [`clojure-mode`](https://github.com/clojure-emacs/clojure-mode/) can nicely align your `are`guments
+for you, and I haven't figured out how to get it to do this with `are`-like macros yet.
 
 ## ClojureScript Support
 
