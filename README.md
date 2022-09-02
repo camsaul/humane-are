@@ -1,9 +1,9 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/camsaul/humane-are/Tests/master?style=for-the-badge)](https://github.com/camsaul/humane-are/actions/workflows/config.yml)
 [![License](https://img.shields.io/badge/license-Eclipse%20Public%20License-blue.svg?style=for-the-badge)](https://raw.githubusercontent.com/camsaul/humane-are/master/LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/camsaul/humane-are?style=for-the-badge)](https://github.com/camsaul/humane-are/commits/)
+[![Codecov](https://img.shields.io/codecov/c/github/camsaul/humane-are?style=for-the-badge)](https://codecov.io/gh/camsaul/humane-are)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/camsaul?style=for-the-badge)](https://github.com/sponsors/camsaul)
 [![cljdoc badge](https://img.shields.io/badge/dynamic/json?color=informational&label=cljdoc&query=results%5B%3F%28%40%5B%22artifact-id%22%5D%20%3D%3D%20%22humane-are%22%29%5D.version&url=https%3A%2F%2Fcljdoc.org%2Fapi%2Fsearch%3Fq%3Dio.github.camsaul%2Fhumane-are&style=for-the-badge)](https://cljdoc.org/d/io.github.camsaul/humane-are/CURRENT)
-<!-- [![Codecov](https://img.shields.io/codecov/c/github/camsaul/humane-are?style=for-the-badge)](https://codecov.io/gh/camsaul/humane-are) -->
 <!-- [![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23toucan-4A154B?logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/toucan) -->
 <!-- [![Downloads](https://versions.deps.co/camsaul/humane-are/downloads.svg)](https://versions.deps.co/camsaul/humane-are) -->
 <!-- [![Dependencies Status](https://versions.deps.co/camsaul/humane-are/status.svg)](https://versions.deps.co/camsaul/humane-are) -->
@@ -21,16 +21,13 @@
 `clojure.test/are` is great for writing lots of assertions quickly, but it has two big problems that prevent me from
 using it everywhere:
 
-1. Failing assertions give no indication as to which set of arguments failed if you're using anything that print
-pretty test output such as [Humane Test Output](https://github.com/pjstadig/humane-test-output),
+1. Failing assertions give no indication as to which set of arguments failed if you're using anything that pretty
+prints test output, such as [Humane Test Output](https://github.com/pjstadig/humane-test-output),
 [CIDER](https://github.com/clojure-emacs/cider), or [eftest](https://github.com/weavejester/eftest)
-2. It lets you shoot yourself in the foot by writing expressions that include `is` or `testing`, wrapping them in
+2. `are` lets you shoot yourself in the foot by writing expressions that include `is` or `testing`, and wraps them in
    another `is` without complaining
 
 Humane Are solves both of these problems.
-
-Humane Are is a small library with just one tiny dependency ([macrovich](https://github.com/cgrand/macrovich)), and works
-with either Clojure or ClojureScript.
 
 ## Meaningful Error Messages in Failing Tests
 
@@ -73,7 +70,7 @@ expected: 1000.0M
           + 1000.0
 ```
 
-There's no easy way to tell *which* specific arguments caused the tests to fail.
+There's no easy way to tell *which* specific assertion caused the test to fail.
 
 *Note: this isn't a problem if you're using normal "inhumane" test output, since you'd get something like*
 
@@ -158,8 +155,10 @@ expected: (is
   actual: false
 ```
 
-Why are we getting *two* failures instead of *one*? We've unwittingly written a test that does two assertions instead
-of the one we thought we were getting: we're testing not just
+Why are we getting *two* failures instead of *one*?!
+
+We've unwittingly written a test that does two assertions instead of the one we thought we were getting: we're testing
+not just
 
 ```clj
 (is (= "metabase.com" (u/email->domain "cam@metabase.commm")))
@@ -171,12 +170,12 @@ but
 (is (is (= "metabase.com" (u/email->domain "cam@metabase.commm"))))
 ```
 
-as well. `are` automatically wraps the assertions in its macroexpansion in `is`, so by including one ourselves as well
+as well. `are` automatically wraps the assertions in its macroexpansion in `is`, so by including an `is` ourselves
 we're actually getting `(is (is ...))`. This is generally the wrong thing to do. At best you're just doing an extra
-assertion everywhere where one has borderline meaningless output when it fails, but at worst you can wind up with
-tests that used to pass suddenly no longer passing in ways that are prone to make you pull your hair out.
+assertion everywhere, where one has borderline meaningless output when it fails; at worst you can wind up with
+tests that previously passed suddenly no longer passing in ways that are prone to make you pull your hair out.
 
-Suppose you've defined a `is` custom assertion method. If you tweak it and it stops returning a logically truthy value
+Suppose you've defined a `is` custom assertion method. If you tweak it so it stops returning a logically truthy value
 when the test passes, you can wind up with mystery test failures in places that use it:
 
 ```clj
@@ -201,19 +200,14 @@ expected: (is (broken= 100 100))
 ```
 
 We're accidentally testing both `(is (broken= 100 100))` and `(is (is (broken= 100 100))`, and while the former is
-fine, the latter fails because the expansion for `broken=` returns `nil`.
+fine, the latter fails because the macroexpansion for `broken=` returns `nil`.
 
 It's better just to disallow `is` or `testing` forms inside `are` to prevent you from shooting yourself in the foot.
 
-Humane Are adds an `fdef` [spec](https://github.com/clojure/spec.alpha/) to `are` to validate the expression form; if
-it's a list starting with a symbol that would resolve to `clojure.test/is` or `clojure.test/testing` (or `cljs.test/`
-for ClojureScript) it will fail spec validation, triggering an error during macroexpansion.
-
-```clj
-(require 'humane-are.core)
-
-(humane-are.core/install!)
-```
+Humane Are adds an `fdef` [spec](https://github.com/clojure/spec.alpha/) to `are` to validate the expression form
+during macroexpansion; if the expression is a list starting with a symbol that would resolve to `clojure.test/is` or
+`clojure.test/testing` (or `cljs.test/` for ClojureScript) it will fail spec validation, triggering an error during
+macroexpansion. Here's an example of the useful errors Humane Are gives you:
 
 ```
 Call to clojure.test/are did not conform to spec.
@@ -229,18 +223,18 @@ Call to clojure.test/are did not conform to spec.
 
 `(humane-are.core/install!)` simply swaps out the `clojure.core/are` macro with a replacement macro,
 `humane-are.core/are+`, and defines a spec for `are` with `clojure.spec/fdef`. Any time Clojure macroexpands an `are`
-form after installing it, it will use the new macro with extra `testing` context, and Clojure will check the args to
-it using the spec. The replacement macro uses the same underlying namespace, `clojure.template`, that
-`clojure.test/are` uses, so the behavior is otherwise exactly the same.
+form after installing it, it will use the new macro with extra `testing` context, and Clojure will check the args
+using the spec. The replacement macro uses the same underlying namespace, `clojure.template`, that `clojure.test/are`
+uses, so the behavior is otherwise exactly the same.
 
 If you don't want to *replace* `clojure.core/are`, you can use `humane-are.core/are+` directly without installing it.
 
 Don't be afraid to install it tho. If you change your mind or hate fun you can use `humane-are.core/uninstall!` to
 uninstall Humane Are and go back to a sad world of imhumane `are`.
 
-I think replacing `clojure.test/are`/`cljs.test/are` is generally preferable because lots of tooling is built around
-it -- for example [`clojure-mode`](https://github.com/clojure-emacs/clojure-mode/) can nicely align your `are`guments
-for you, and I haven't figured out how to get it to do this with `are`-like macros yet.
+I've tried [living in a world of having a separate custom version of
+`are`](https://github.com/metabase/metabase/blob/bc4acbd2d1984e40ab91e87f61a40878939fb560/test/metabase/test.clj#L359-L378)
+for a few years now and I think having tried it both ways replacing `clojure.core/are` is absolutely the way to go.
 
 ## ClojureScript Support
 
@@ -249,7 +243,7 @@ for you, and I haven't figured out how to get it to do this with `are`-like macr
 
 `cljs.test/are` and `humane-are/are+` are macros, which means they normally get macroexpanded in a JVM Clojure context
 before ClojureScript ever sees them. This means you can only `install!` Humane Are in a Clojure context. To `install!`
-Humane Are so it's used when compiling macros for ClojureScript, you'll have to create a `.cljc` file like this:
+Humane Are so it's used when compiling macros for ClojureScript, you can create a `.cljc` file like this:
 
 ```clj
 (ns some-cljc-namespace
@@ -259,8 +253,8 @@ Humane Are so it's used when compiling macros for ClojureScript, you'll have to 
    (humane-are.core/install!))
 ```
 
-As a convenience this library provides the namespace `humane-are.install`. Simply requiring this namespace in a
-`.cljs` or `.cljc` file will install Humane Are for you.
+As a convenience this library provides the namespace `humane-are.install` which does exactly the same thing. Simply
+requiring this namespace in a `.cljs` or `.cljc` file will install Humane Are for you.
 
 ## License
 
