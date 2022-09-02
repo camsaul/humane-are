@@ -68,10 +68,8 @@ jobs:
           ~/.gitlibs
           ~/.deps.clj
         key: tests-cljs
-    - name: Compile
-      run: yarn run shadow-cljs compile
     - name: Run tests
-      run: node target/node-tests.js
+      run: yarn run test
 
   whitespace-linter:
     runs-on: ubuntu-20.04
