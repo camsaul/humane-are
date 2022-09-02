@@ -36,6 +36,8 @@
              (aliased-is-or-testing? symb)))))
 
 (s/def ::are-args
+  ;; clojure.template validates that the bindings are valid, and that the count of args is some multiple of the bindigs,
+  ;; so we don't need to do it here as well.
   (s/cat :bindings vector?
          :expr     (complement is-or-testing-form?)
          :args     (s/+ any?)))
@@ -85,9 +87,3 @@
     (s/fdef cljs.test/are
       :args any?
       :ret  any?)))
-
-(comment
-  (macros/case :cljs (install!)))
-
-(println "<INSTALL>")
-(install!)
