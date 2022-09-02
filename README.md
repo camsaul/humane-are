@@ -1,71 +1,266 @@
-This project was bootstrapped with [Create CLJS App](https://github.com/filipesilva/create-cljs-app).
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/camsaul/humane-are/Tests/master?style=for-the-badge)](https://github.com/camsaul/humane-are/actions/workflows/config.yml)
+[![License](https://img.shields.io/badge/license-Eclipse%20Public%20License-blue.svg?style=for-the-badge)](https://raw.githubusercontent.com/camsaul/humane-are/master/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/camsaul/humane-are?style=for-the-badge)](https://github.com/camsaul/humane-are/commits/)
+[![Codecov](https://img.shields.io/codecov/c/github/camsaul/humane-are?style=for-the-badge)](https://codecov.io/gh/camsaul/humane-are)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/camsaul?style=for-the-badge)](https://github.com/sponsors/camsaul)
+[![cljdoc badge](https://img.shields.io/badge/dynamic/json?color=informational&label=cljdoc&query=results%5B%3F%28%40%5B%22artifact-id%22%5D%20%3D%3D%20%22toucan2%22%29%5D.version&url=https%3A%2F%2Fcljdoc.org%2Fapi%2Fsearch%3Fq%3Dio.github.camsaul%2Ftoucan2&style=for-the-badge)](https://cljdoc.org/d/io.github.camsaul/humane-are/CURRENT)
+<!-- [![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23toucan-4A154B?logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/toucan) -->
+<!-- [![Downloads](https://versions.deps.co/camsaul/humane-are/downloads.svg)](https://versions.deps.co/camsaul/humane-are) -->
+<!-- [![Dependencies Status](https://versions.deps.co/camsaul/humane-are/status.svg)](https://versions.deps.co/camsaul/humane-are) -->
 
-## Available Scripts
+[![Clojars Project](https://clojars.org/io.github.camsaul/humane-are/latest-version.svg)](https://clojars.org/io.github.camsaul/humane-are)
 
-In the project directory, you can run:
+# Humane Are
 
-### `yarn start`
+```clj
+(require 'humane-are.core)
 
-Runs the app in development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-The page will reload if you make edits.
+(humane-are.core/install!)
+```
 
-The app uses [Reagent](https://reagent-project.github.io), a minimalistic interface between ClojureScript and React.<br>
-You can use existing npm React components directly via a [interop call](http://reagent-project.github.io/docs/master/InteropWithReact.html#creating-reagent-components-from-react-components).
+`clojure.test/are` is great for writing lots of assertions quickly, but it has two big problems that prevent me from
+using it everywhere:
 
-Builds use [Shadow CLJS](https://github.com/thheller/shadow-cljs) for maximum compatibility with NPM libraries. You'll need a [Java SDK](https://adoptopenjdk.net/) (Version 8+, Hotspot) to use it. <br>
-You can [import npm libraries](https://shadow-cljs.github.io/docs/UsersGuide.html#js-deps) using Shadow CLJS. See the [user manual](https://shadow-cljs.github.io/docs/UsersGuide.html) for more information.
+1. Failing assertions give no indication as to which set of arguments failed if you're using anything that print
+pretty test output such as [Humane Test Output](https://github.com/pjstadig/humane-test-output),
+[CIDER](https://github.com/clojure-emacs/cider), or [eftest](https://github.com/weavejester/eftest)
+2. It lets you shoot yourself in the foot by writing expressions that include `is` or `testing`, wrapping them in
+   another `is` without complaining
 
-### `yarn cards`
+Humane Are solves both of these problems.
 
-Runs the interactive live development enviroment.<br>
-You can use it to design, test, and think about parts of your app in isolation.
+Humane Are is a small library with just one tiny dependency ([macrovich](https://github.com/cgrand/macrovich)), and works
+with either Clojure or ClojureScript.
 
-This environment uses [Devcards](https://github.com/bhauman/devcards) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro).
+## Meaningful Error Messages in Failing Tests
 
-### `yarn build`
+Here's a [real-world test using `are` that I wrote for
+Metabase](https://github.com/metabase/metabase/blob/bc4acbd2d1984e40ab91e87f61a40878939fb560/test/metabase/util_test.clj#L255-L274):
 
-Builds the app for production to the `public` folder.<br>
-It correctly bundles all code and optimizes the build for the best performance.
+```clj
+(deftest parse-currency-test
+  (are [s expected] (= expected
+                       (u/parse-currency s))
+    nil             nil
+    ""              nil
+    "   "           nil
+    "$1,000"        1000.0M
+    "$1,000,000"    1000000.0M
+    "$1,000.00"     1000.0M
+    "€1.000"        1000.0M
+    "€1.000,00"     1000.0M
+    "€1.000.000,00" 1000000.0M
+    "-£127.54"      -127.54M
+    "-127,54 €"     -127.54M
+    "kr-127,54"     -127.54M
+    "€ 127,54-"     -127.54M
+    "¥200"          200.0M
+    "¥200."         200.0M
+    "$.05"          0.05M
+    "0.05"          0.05M))
+```
 
-Your app is ready to be deployed!
+What happens if there's a test failure? Here's the output with standard `are` with [Humane Test
+Output](https://github.com/pjstadig/humane-test-output):
 
-## Other useful scripts
+```
+Fail in parse-currency-test
 
-### `null` and `yarn e2e`
+expected: 1000.0M
 
-You can use `null` to run tests a single time, and `yarn e2e` to run the end-to-end test app.
-`yarn test` launches tests in interactive watch mode.<br>
+  actual: 1000.0
+    diff: - 1000.0M
+          + 1000.0
+```
 
-See the ClojureScript [testing page](https://clojurescript.org/tools/testing) for more information. E2E tests use [Taiko](https://github.com/getgauge/taiko) to interact with a headless browser.
+There's no easy way to tell *which* specific arguments caused the tests to fail.
 
-### `yarn lint` and `yarn format`
+*Note: this isn't a problem if you're using normal "inhumane" test output, since you'd get something like*
 
-`yarn lint` checks the code for known bad code patterns using [clj-kondo](https://github.com/borkdude/clj-kondo).
+```
+FAIL in (parse-currency-test)
+expected: (= 1000.0M (u/parse-currency "$1,000.00"))
+  actual: (not (= 1000.0M 1000.0))
+```
 
-`yarn format` will format your code in a consistent manner using [zprint-clj](https://github.com/clj-commons/zprint-clj).
+*If that describes you, you can skip to the next section.*
 
-### `yarn report`
+Let's try installing Humane Are, and running the test again:
 
-Make a report of what files contribute to your app size.<br>
-Consider [code-splitting](https://code.thheller.com/blog/shadow-cljs/2019/03/03/code-splitting-clojurescript.html) or using smaller libraries to make your app load faster.
+```clj
+(require 'humane-are.core)
 
-### `yarn server`
+(humane-are.core/install!)
+```
 
-Starts a Shadow CLJS background server.<br>
-This will speed up starting time for other commands that use Shadow CLJS.
+```
+Fail in parse-currency-test
+(= 1000.0M (u/parse-currency "$1,000.00"))
 
-## Useful resources
+expected: 1000.0M
 
-Clojurians Slack http://clojurians.net/.
+  actual: 1000.0
+    diff: - 1000.0M
+          + 1000.0
+```
 
-CLJS FAQ (for JavaScript developers) https://clojurescript.org/guides/faq-js.
+Humane Are adds `testing` context so you know which specific arguments caused the test to fail.
 
-Official CLJS API https://cljs.github.io/api/.
+## Anti-Foot-Shooting Protection
 
-Quick reference https://cljs.info/cheatsheet/.
+Here's [another real-world
+example](https://github.com/metabase/metabase/blob/bc4acbd2d1984e40ab91e87f61a40878939fb560/test/metabase/util_test.clj#L339-L346)
+that I discovered just now while I was in the process of writing this README. What's wrong with this test?
 
-Offline searchable docs https://devdocs.io/.
+```clj
+(deftest email->domain-test
+  (are [domain email] (is (= domain
+                             (u/email->domain email))
+                          (format "Domain of email address '%s'" email))
+    nil              nil
+    "metabase.com"   "cam@metabase.com"
+    "metabase.co.uk" "cam@metabase.co.uk"
+    "metabase.com"   "cam.saul+1@metabase.com"))
+```
 
-VSCode plugin https://github.com/BetterThanTomorrow/calva.
+Let's try changing one of the assertions, to try to make it fail. Here I've swapped out one of the domains from
+`metabase.com` to `metabase.commm`:
 
+```clj
+(deftest email->domain-test
+  (are [domain email] (is (= domain
+                             (u/email->domain email))
+                          (format "Domain of email address '%s'" email))
+    nil              nil
+    "metabase.com"   "cam@metabase.commm"
+    "metabase.co.uk" "cam@metabase.co.uk"
+    "metabase.com"   "cam.saul+1@metabase.com"))
+```
+
+```
+2 non-passing tests:
+
+Fail in email->domain-test
+Domain of email address 'cam@metabase.commm'
+expected: "metabase.com"
+
+  actual: "metabase.commm"
+    diff: - "metabase.com"
+          + "metabase.commm"
+
+
+Fail in email->domain-test
+
+expected: (is
+           (= "metabase.com" (u/email->domain "cam@metabase.commm"))
+           (format "Domain of email address '%s'" "cam@metabase.commm"))
+
+  actual: false
+```
+
+Why are we getting *two* failures instead of *one*? We've unwittingly written a test that does two assertions instead
+of the one we thought we were getting: we're testing not just
+
+```clj
+(is (= "metabase.com" (u/email->domain "cam@metabase.commm")))
+```
+
+but
+
+```clj
+(is (is (= "metabase.com" (u/email->domain "cam@metabase.commm"))))
+```
+
+as well. `are` automatically wraps the assertions in its macroexpansion in `is`, so by including one ourselves as well
+we're actually getting `(is (is ...))`. This is generally the wrong thing to do. At best you're just doing an extra
+assertion everywhere where one has borderline meaningless output when it fails, but at worst you can wind up with
+tests that used to pass suddenly no longer passing in ways that are prone to make you pull your hair out.
+
+Suppose you've defined a `is` custom assertion method. If you tweak it and it stops returning a logically truthy value
+when the test passes, you can wind up with mystery test failures in places that use it:
+
+```clj
+(defmethod assert-expr 'broken=
+  [message [_ expected actual]]
+  `(let [expected# ~expected
+         actual#   ~actual]
+     (when-not (= expected# actual#)
+       (do-report {:type :fail, :message ~message, :expected expected#, :actual actual#}))))
+
+(deftest x-test
+  (are [x] (is (broken= x 100))
+    100))
+```
+
+```
+Fail in x-test
+
+expected: (is (broken= 100 100))
+
+  actual: nil
+```
+
+We're accidentally testing both `(is (broken= 100 100))` and `(is (is (broken= 100 100))`, and while the former is
+fine, the latter fails because the expansion for `broken=` returns `nil`.
+
+It's better just to disallow `is` or `testing` forms inside `are` to prevent you from shooting yourself in the foot.
+
+Humane Are adds an `fdef` [spec](https://github.com/clojure/spec.alpha/) to `are` to validate the expression form; if
+it's a list starting with a symbol that would resolve to `clojure.test/is` or `clojure.test/testing` (or `cljs.test/`
+for ClojureScript) it will fail spec validation, triggering an error during macroexpansion.
+
+```clj
+(require 'humane-are.core)
+
+(humane-are.core/install!)
+```
+
+```
+Call to clojure.test/are did not conform to spec.
+#:clojure.spec.alpha{:problems
+                     [{:path [:expr],
+                       :pred (clojure.core/complement humane-are.core/is-or-testing-form?),
+                       :val (is (= domain (u/email->domain email)) (format "Domain of email address '%s'" email)),
+                       :via [],
+                       :in [1]}]}
+```
+
+## How Does it Work?
+
+`(humane-are.core/install!)` simply swaps out the `clojure.core/are` macro with a replacement macro,
+`humane-are.core/are+`, and defines a spec for `are` with `clojure.spec/fdef`. Any time Clojure macroexpands an `are`
+form after installing it, it will use the new macro with extra `testing` context, and Clojure will check the args to
+it using the spec. The replacement macro uses the same underlying namespace, `clojure.template`, that
+`clojure.test/are` uses, so the behavior is otherwise exactly the same.
+
+If you don't want to *replace* `clojure.core/are`, you can use `humane-are.core/are+` directly without installing it.
+
+Don't be afraid to install it tho. If you change your mind or hate fun you can use `humane-are.core/uninstall!` to
+uninstall Humane Are and go back to a sad world of imhumane `are`.
+
+## ClojureScript Support
+
+`humane-are.core/are+` works with ClojureScript, including both the extra testing context
+(`cljs.test/testing` in this case) and spec-based validation, without jumping thru any hoops.
+
+`cljs.test/are` and `humane-are/are+` are macros, which means they normally get macroexpanded in a JVM Clojure context
+before ClojureScript ever sees them. This means you can only `install!` Humane Are in a Clojure context. To `install!`
+Humane Are so it's used when compiling macros for ClojureScript, you'll have to create a `.cljc` file like this:
+
+```clj
+(ns some-cljc-namespace
+  (:require [humane-are.core]))
+
+#?(:clj
+   (humane-are.core/install!))
+```
+
+As a convenience this library provides the namespace `humane-are.install`. Simply requiring this namespace in a
+`.cljs` or `.cljc` file will install Humane Are for you.
+
+## License
+
+Code and documentation copyright © 2022 [Cam Saul](https://camsaul.com).
+
+Distributed under the [Eclipse Public License](https://raw.githubusercontent.com/camsaul/humane-are/master/LICENSE),
+same as Clojure.

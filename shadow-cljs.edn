@@ -1,6 +1,9 @@
 {:source-paths
  ["src" "test"]
 
+ :dependencies
+ [[net.cgrand/macrovich "0.2.1"]]
+
  :builds
  {:test
   {:ns-regexp "-test$"

@@ -1,6 +1,9 @@
 {:paths
  ["src" "resources"]
 
+ :deps
+ {net.cgrand/macrovich {:mvn/version "0.2.1"}}
+
  :aliases
  {
   ;; clojure -M:check
