@@ -46,7 +46,7 @@
 
 (macros/case :cljs (require 'cljs.test))
 
-(defonce ^:private original-are (var-get (macros/case :clj #'clojure.test/are :cljs #'cljs.test/are)))
+(defonce ^:private original-are (var-get (macros/case :clj #'clojure.test/are :cljs #_{:clj-kondo/ignore [:unresolved-namespace]} #'cljs.test/are)))
 
 (defn install!
   "Replace [[clojure.test/are]] with a version that includes the actual form being tested as [[clojure.test/testing]]
