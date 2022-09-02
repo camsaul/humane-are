@@ -1,7 +1,6 @@
 (ns humane-are.core-test
   (:require [#?(:clj clojure.test :cljs cljs.test) :as t]
-            [humane-are.core :as humane-are]
-            [humane-are.install]))
+            [humane-are.core :as humane-are]))
 
 #?(:clj
    (t/deftest macroexpansion-error-test
@@ -28,11 +27,3 @@
   (humane-are/are+ [x y] (= x y)
     1 (inc 2)
     1 (inc 3)))
-
-(t/deftest test-4
-  (t/are [expected s] (= expected s)
-    1 (inc 2)))
-
-(t/deftest test-5
-  (humane-are/are+ [expected s] (= expected s)
-                   1 (inc 2)))
